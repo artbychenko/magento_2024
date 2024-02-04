@@ -114,6 +114,39 @@ class AddressPlugin
     }
 
     /**
+     * Load operator options
+     *
+     * @param Address $subject
+     * @param array $opt
+     *
+     * @return array
+     */
+    public function afterGetOperatorSelectOptions(
+        Address $subject,
+        array $opt
+    ): array {
+        if ($subject->getAttribute() === self::COLOR_ATTRIBUTE_CODE) {
+            $operators = [
+                '==' => __('is')
+            ];
+            $type = $subject->getInputType();
+            $opt = [];
+            $operatorByType = $subject->getOperatorByInputType();
+
+            foreach ($operators as $value => $label) {
+                if (!$operatorByType || in_array($value, $operatorByType[$type])) {
+                    $opt[] = [
+                        'value' => $value,
+                        'label' => $label
+                    ];
+                }
+            }
+        }
+
+        return $opt;
+    }
+
+    /**
      * Validate model
      *
      * @param Address $subject
