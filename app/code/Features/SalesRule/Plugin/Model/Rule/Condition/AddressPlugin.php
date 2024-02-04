@@ -12,6 +12,7 @@ use Magento\Framework\Model\AbstractModel;
 use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Quote\Api\Data\CartInterface;
+use Magento\Catalog\Model\Product\Type\Simple;
 
 /**
  * Class AddressPlugin
@@ -30,6 +31,7 @@ class AddressPlugin
      */
     public const PRODUCT_COLOR_ATTRIBUTE_LABEL = 'Color';
     public const PRODUCT_COLOR_ATTRIBUTE_VALUE = 'red';
+    public const PRODUCT_COLOR_ATTRIBUTE_CODE = 'color';
 
     /**
      * Add Custom Attribute
@@ -183,30 +185,44 @@ class AddressPlugin
     /**
      * Check product color attribute
      *
-     * @param CartInterface $quote
+     * @param CartInterface|null $quote
      *
      * @return bool
      */
-    private function isColorSet(CartInterface $quote): bool
+    private function isColorSet(?CartInterface $quote): bool
     {
         $isColorSet = false;
-        $quoteItems = $quote->getItems();
 
-        foreach ($quoteItems as $item) {
-            $product = $item->getProduct();
-            /** @var Configurable $typeInstance */
-            $typeInstance = $product->getTypeInstance(true);
+        if (isset($quote)) {
+            $quoteItems = $quote->getItems();
+        }
 
-            if ($typeInstance instanceof Configurable) {
-                $options = $typeInstance->getSelectedAttributesInfo($product);
+        if (isset($quoteItems)) {
+            foreach ($quoteItems as $item) {
+                $product = $item->getProduct();
+                /** @var Configurable|Simple $typeInstance */
+                $typeInstance = $product->getTypeInstance(true);
 
-                foreach ($options as $option) {
-                    if (
-                        $option['label'] === self::PRODUCT_COLOR_ATTRIBUTE_LABEL
-                        && $option['value'] === self::PRODUCT_COLOR_ATTRIBUTE_VALUE
-                    ) {
-                        $isColorSet = true;
-                        break;
+                if ($typeInstance instanceof Configurable) {
+                    $options = $typeInstance->getSelectedAttributesInfo($product);
+
+                    foreach ($options as $option) {
+                        if (
+                            $option['label'] === self::PRODUCT_COLOR_ATTRIBUTE_LABEL
+                            && $option['value'] === self::PRODUCT_COLOR_ATTRIBUTE_VALUE
+                        ) {
+                            $isColorSet = true;
+                            break;
+                        }
+                    }
+                } else {
+                    if ($typeInstance instanceof Simple) {
+                        $attributeValue = $product->getAttributeText(self::PRODUCT_COLOR_ATTRIBUTE_CODE);
+
+                        if ($attributeValue === self::PRODUCT_COLOR_ATTRIBUTE_VALUE) {
+                            $isColorSet = true;
+                            break;
+                        }
                     }
                 }
             }
