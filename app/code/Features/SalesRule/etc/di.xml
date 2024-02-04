@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author Artem Bychenko artbychenko@gmail.com
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\SalesRule\Model\Rule\Condition\Address">
+        <plugin name="Features_SalesRule::customCondition"
+                sortOrder="100"
+                type="Features\SalesRule\Plugin\Model\Rule\Condition\AddressPlugin"/>
+    </type>
+</config>
